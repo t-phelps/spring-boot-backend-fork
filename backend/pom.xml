@@ -31,6 +31,19 @@
     </properties>
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.flywaydb</groupId>
+                <artifactId>flyway-maven-plugin</artifactId>
+                <version>11.7.2</version>
+                <configuration>
+                    <url>jdbc:postgresql://localhost:PORT/DB_NAME</url>
+                    <user>USERNAME</user>
+                    <password>PASSWORD</password>
+                    <locations>
+                        <location>filesystem:src/main/resources/db/migration</location>
+                    </locations>
+                </configuration>
+            </plugin>
             <!-- jOOQ Code Generation -->
             <plugin>
                 <groupId>org.jooq</groupId>
@@ -56,7 +69,7 @@
                         <name>org.jooq.codegen.JavaGenerator</name>
                         <database>
                             <name>org.jooq.meta.postgres.PostgresDatabase</name>
-                            <includes>*</includes> <!-- lowercase table name -->
+                            <includes>.*</includes> <!-- lowercase table name -->
                             <excludes>flyway_schema_history</excludes>
                             <schemata>
                                 <schema>

@@ -1,6 +1,7 @@
 package com.tphelps.backend.config;
 
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -22,6 +23,13 @@ import java.util.List;
 @EnableWebSecurity
 public class SecurityConfig {
 
+    private final JwtAuthEntryPoint jwtAuthEntryPoint;
+
+    @Autowired
+    public SecurityConfig(JwtAuthEntryPoint jwtAuthEntryPoint) {
+        this.jwtAuthEntryPoint = jwtAuthEntryPoint;
+    }
+
     @Bean
     public AuthenticationManager authenticationManager(UsernamePwdAuthenticationProvider provider) {
         return new ProviderManager(provider);
@@ -34,7 +42,7 @@ public class SecurityConfig {
      * @throws Exception - on error
      */
     @Bean
-    SecurityFilterChain springSecurityFilterChain(HttpSecurity http,
+    SecurityFilterChain securityFilterChain(HttpSecurity http,
                                                   UsernamePwdAuthenticationProvider usernamePwdAuthenticationProvider) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
@@ -46,6 +54,7 @@ public class SecurityConfig {
                     config.setAllowedHeaders(List.of("*"));
                     return config;
                 }))
+                .exceptionHandling(exception -> exception.authenticationEntryPoint(jwtAuthEntryPoint))
                 .authorizeHttpRequests(requests -> {
                     requests
                             .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
