@@ -1,6 +1,9 @@
 # Secrets — never commit these
 .env
 
+# direnv
+.envrc
+
 # Maven build output
 target/
 

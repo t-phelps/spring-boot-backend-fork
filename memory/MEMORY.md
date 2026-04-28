@@ -1,0 +1,1 @@
+- [Don't remove containers on port conflict](feedback_no_remove_containers.md) — remap to a free host port instead of stopping whatever owns the port

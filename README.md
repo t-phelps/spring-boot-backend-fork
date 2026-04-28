@@ -2,6 +2,8 @@
 
 Spring Boot backend starter with JWT cookie auth, Spring Security, jOOQ, Flyway, and PostgreSQL. Fork this to skip the boilerplate on new projects.
 
+> **Environment variables** are managed with [direnv](https://direnv.net/). Install it, add `eval "$(direnv hook bash)"` to your `~/.bashrc`, then run `direnv allow` in this directory. Variables in `.env` will be automatically loaded when you `cd` into the project and unloaded when you leave — no conflicts with system environment variables.
+
 ---
 
 ### Prerequisites
@@ -9,6 +11,7 @@ Spring Boot backend starter with JWT cookie auth, Spring Security, jOOQ, Flyway,
 - Java 17+
 - Maven 3.9+ (or use the included `mvnw` wrapper)
 - Docker & Docker Compose (for local PostgreSQL)
+- [direnv](https://direnv.net/) (for automatic `.env` loading)
 
 ---
 
