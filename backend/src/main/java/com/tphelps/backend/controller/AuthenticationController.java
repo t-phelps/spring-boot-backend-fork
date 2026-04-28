@@ -3,6 +3,7 @@ package com.tphelps.backend.controller;
 import com.tphelps.backend.service.CustomUserDetailsService;
 import com.tphelps.backend.dtos.CreateAccountRequest;
 import com.tphelps.backend.dtos.LoginRequest;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
@@ -33,11 +34,7 @@ public class AuthenticationController {
      * @return - response containing success or failure and their signed jwt if passed
      */
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
-        if(loginRequest.username().isEmpty() || loginRequest.password().isEmpty()) {
-            return ResponseEntity.badRequest().body("Failed Login: A field within the request is empty");
-        }
-
+    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest loginRequest) {
         try{
             Authentication  authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(loginRequest.username(), loginRequest.password()));
@@ -51,11 +48,7 @@ public class AuthenticationController {
 
 
     @PostMapping("/create")
-    public ResponseEntity<?> createAccount(@RequestBody CreateAccountRequest request){
-        if(request.email().isEmpty() || request.username().isEmpty() || request.password().isEmpty()) {
-            return ResponseEntity.badRequest().body("Failed To Create Account: A field within the request is empty");
-        }
-
+    public ResponseEntity<?> createAccount(@Valid @RequestBody CreateAccountRequest request){
         try{
             ResponseCookie cookie = customUserDetailsService.createUser(request);
             return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, cookie.toString()).body("Account created successfully");

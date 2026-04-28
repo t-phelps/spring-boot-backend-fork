@@ -5,6 +5,7 @@ import com.tphelps.backend.jwt.JwtTokenGenerator;
 import com.tphelps.backend.repository.AuthenticationRepository;
 import com.tphelps.backend.dtos.CreateAccountRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -17,7 +18,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import test.generated.tables.pojos.Users;
+import com.tphelps.backend.generated.tables.pojos.Users;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
 import java.time.LocalDateTime;
@@ -30,6 +31,12 @@ public class CustomUserDetailsService implements UserDetailsService {
     private final PasswordEncoder passwordEncoder;
     private final AccountRepository accountRepository;
     private final JwtTokenGenerator jwtTokenGenerator;
+
+    @Value("${jwt.expiration-ms:3600000}")
+    private long jwtExpirationMs;
+
+    @Value("${cookie.secure:true}")
+    private boolean cookieSecure;
 
     @Autowired
     public CustomUserDetailsService(AuthenticationRepository authenticationRepository,
@@ -112,16 +119,10 @@ public class CustomUserDetailsService implements UserDetailsService {
         String password = request.password(); // is this unsafe to do this here? notice in Authentication object, Credentials: [Protected]
         String role = "USER";
 
-        // hash the password using jBCrypt
         String hashedPassword = passwordEncoder.encode(password);
 
-        try {
-            // save the user to the database
-            authenticationRepository.createUser(new Users(null, email, username, hashedPassword, role, LocalDateTime.now()));
-        }catch(Exception e) {
-            e.printStackTrace();
-            return null;
-        }
+        // save the user to the database — let exceptions propagate to the global exception handler
+        authenticationRepository.createUser(new Users(null, email, username, hashedPassword, role, LocalDateTime.now()));
 
         return generateUserCookie(username);
     }
@@ -156,8 +157,10 @@ public class CustomUserDetailsService implements UserDetailsService {
         // return a response cookie to be stored in the front end
         return ResponseCookie.from("jwt", jws)
                 .httpOnly(true)
+                .secure(cookieSecure)
+                .sameSite("Strict")
                 .path("/")
-                .maxAge(3600)
+                .maxAge(jwtExpirationMs / 1000)
                 .build();
     }
 }

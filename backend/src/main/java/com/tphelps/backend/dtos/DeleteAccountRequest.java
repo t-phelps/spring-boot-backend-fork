@@ -2,8 +2,7 @@ package com.tphelps.backend.dtos;
 
 import jakarta.validation.constraints.NotBlank;
 
-public record LoginRequest(
-        @NotBlank String username,
+public record DeleteAccountRequest(
         @NotBlank String password
 ) {
 }

@@ -4,8 +4,8 @@ package com.tphelps.backend.repository;
 import org.jooq.DSLContext;
 import org.springframework.stereotype.Repository;
 
-import static test.generated.tables.Users.USERS;
-import test.generated.tables.pojos.Users;
+import static com.tphelps.backend.generated.tables.Users.USERS;
+import com.tphelps.backend.generated.tables.pojos.Users;
 
 @Repository
 public class AccountRepository {

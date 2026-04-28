@@ -1,0 +1,53 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: backend_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DB_HOST: localhost
+      DB_PORT: 5432
+      DB_NAME: backend_test
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+      JWT_SECRET: ci-test-secret-replace-with-real-value-in-production
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Run Flyway migrations
+        working-directory: backend
+        run: ./mvnw flyway:migrate
+
+      - name: Build and test
+        working-directory: backend
+        # -Pgenerate-jooq enables jOOQ codegen (requires DB); runs generate-sources as part of verify lifecycle
+        run: ./mvnw verify -Pgenerate-jooq

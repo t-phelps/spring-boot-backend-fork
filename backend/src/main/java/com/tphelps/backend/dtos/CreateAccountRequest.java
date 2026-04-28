@@ -1,4 +1,12 @@
 package com.tphelps.backend.dtos;
 
-public record CreateAccountRequest(String email, String username, String password) {
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
+public record CreateAccountRequest(
+        @NotBlank @Email String email,
+        @NotBlank @Size(min = 3, max = 50) String username,
+        @NotBlank @Size(min = 8) String password
+) {
 }

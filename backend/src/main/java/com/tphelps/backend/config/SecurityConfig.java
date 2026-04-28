@@ -2,6 +2,7 @@ package com.tphelps.backend.config;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -25,6 +26,9 @@ public class SecurityConfig {
 
     private final JwtAuthEntryPoint jwtAuthEntryPoint;
 
+    @Value("${cors.allowed-origin:http://localhost:3000}")
+    private String allowedOrigin;
+
     @Autowired
     public SecurityConfig(JwtAuthEntryPoint jwtAuthEntryPoint) {
         this.jwtAuthEntryPoint = jwtAuthEntryPoint;
@@ -34,6 +38,7 @@ public class SecurityConfig {
     public AuthenticationManager authenticationManager(UsernamePwdAuthenticationProvider provider) {
         return new ProviderManager(provider);
     }
+
     /**
      * SecurityFilterChain method to define which api endpoints we should require authorization on
      * as well as filter per JWT authentication and define our own auth provider
@@ -49,7 +54,7 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(request -> {
                     CorsConfiguration config = new CorsConfiguration();
                     config.setAllowCredentials(true);
-                    config.setAllowedOrigins(List.of("http://localhost:FRONTEND_PORT"));
+                    config.setAllowedOrigins(List.of(allowedOrigin));
                     config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
                     config.setAllowedHeaders(List.of("*"));
                     return config;
@@ -59,7 +64,10 @@ public class SecurityConfig {
                     requests
                             .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                             .requestMatchers("/auth/login", "/auth/create").permitAll()
-                            .requestMatchers("/OTHER______ENDPOINTS").authenticated()
+                            .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/api-docs/**").permitAll()
+                            .requestMatchers("/actuator/health").permitAll()
+                            // Add additional authenticated endpoints here, e.g.:
+                            // .requestMatchers("/my-resource/**").authenticated()
                             .anyRequest().authenticated();
                 })
                 .httpBasic(AbstractHttpConfigurer::disable)
